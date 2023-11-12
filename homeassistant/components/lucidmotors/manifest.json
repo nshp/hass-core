@@ -1,0 +1,13 @@
+{
+  "domain": "lucidmotors",
+  "name": "Lucid Motors",
+  "codeowners": ["@nshp"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/lucidmotors",
+  "homekit": {},
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": []
+}

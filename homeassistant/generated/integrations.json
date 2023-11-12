@@ -3181,6 +3181,12 @@
       "config_flow": true,
       "iot_class": "local_push"
     },
+    "lucidmotors": {
+      "name": "Lucid Motors",
+      "integration_type": "hub",
+      "config_flow": true,
+      "iot_class": "cloud_polling"
+    },
     "luftdaten": {
       "name": "Sensor.Community",
       "integration_type": "device",

@@ -15,13 +15,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    LENGTH,
-    PERCENTAGE,
-    TEMPERATURE,
-    UnitOfLength,
-    UnitOfTemperature,
-)
+from homeassistant.const import PERCENTAGE, UnitOfLength, UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
@@ -38,7 +32,6 @@ class LucidSensorEntityDescription(SensorEntityDescription):
     """Describes Lucid sensor entity."""
 
     key_path: list[str] = field(default_factory=list)
-    unit_type: str | None = None
     value: Callable = lambda x, y: x
 
 
@@ -48,24 +41,23 @@ SENSOR_TYPES: dict[str, LucidSensorEntityDescription] = {
         key_path=["state", "charging"],
         translation_key="charging_target",
         icon="mdi:battery-charging-high",
-        unit_type=PERCENTAGE,
         suggested_display_precision=0,
+        native_unit_of_measurement=PERCENTAGE,
     ),
     "remaining_battery_percent": LucidSensorEntityDescription(
         key="charge_percent",
         key_path=["state", "battery"],
         translation_key="remaining_battery_percent",
-        unit_type=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=0,
+        native_unit_of_measurement=PERCENTAGE,
     ),
     "remaining_range": LucidSensorEntityDescription(
         key="remaining_range",
         key_path=["state", "battery"],
         translation_key="remaining_range",
         icon="mdi:map-marker-distance",
-        unit_type=LENGTH,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfLength.KILOMETERS,
     ),
@@ -74,20 +66,20 @@ SENSOR_TYPES: dict[str, LucidSensorEntityDescription] = {
         key_path=["state", "cabin"],
         translation_key="exterior_temp",
         icon="mdi:thermometer",
-        unit_type=TEMPERATURE,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        suggested_display_precision=1,
     ),
     "interior_temp": LucidSensorEntityDescription(
         key="interior_temp_c",
         key_path=["state", "cabin"],
         translation_key="interior_temp",
         icon="mdi:thermometer",
-        unit_type=TEMPERATURE,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        suggested_display_precision=1,
     ),
 }
 
@@ -129,13 +121,6 @@ class LucidSensor(LucidBaseEntity, SensorEntity):
         super().__init__(coordinator, vehicle)
         self.entity_description = description
         self._attr_unique_id = f"{vehicle.config.vin}-{description.key}"
-
-        # Set the correct unit of measurement based on the unit_type
-        if description.unit_type:
-            self._attr_native_unit_of_measurement = (
-                coordinator.hass.config.units.as_dict().get(description.unit_type)
-                or description.unit_type
-            )
 
     @callback
     def _handle_coordinator_update(self) -> None:

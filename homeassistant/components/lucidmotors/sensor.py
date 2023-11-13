@@ -15,7 +15,13 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import LENGTH, PERCENTAGE, UnitOfLength
+from homeassistant.const import (
+    LENGTH,
+    PERCENTAGE,
+    TEMPERATURE,
+    UnitOfLength,
+    UnitOfTemperature,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
@@ -55,13 +61,33 @@ SENSOR_TYPES: dict[str, LucidSensorEntityDescription] = {
         suggested_display_precision=0,
     ),
     "remaining_range": LucidSensorEntityDescription(
-        key="range_miles",
+        key="remaining_range",
         key_path=["state", "battery"],
         translation_key="remaining_range",
         icon="mdi:map-marker-distance",
         unit_type=LENGTH,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfLength.MILES,
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+    ),
+    "exterior_temp": LucidSensorEntityDescription(
+        key="exterior_temp_c",
+        key_path=["state", "cabin"],
+        translation_key="exterior_temp",
+        icon="mdi:thermometer",
+        unit_type=TEMPERATURE,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+    ),
+    "interior_temp": LucidSensorEntityDescription(
+        key="interior_temp_c",
+        key_path=["state", "cabin"],
+        translation_key="interior_temp",
+        icon="mdi:thermometer",
+        unit_type=TEMPERATURE,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
     ),
 }
 

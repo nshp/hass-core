@@ -46,6 +46,12 @@
       },
       "remaining_range": {
         "name": "Remaining range"
+      },
+      "interior_temp": {
+        "name": "Interior temperature"
+      },
+      "exterior_temp": {
+        "name": "Exterior temperature"
       }
     }
   }

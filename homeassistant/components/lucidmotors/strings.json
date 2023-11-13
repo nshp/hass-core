@@ -53,6 +53,32 @@
       "exterior_temp": {
         "name": "Exterior temperature"
       }
+    },
+    "binary_sensor": {
+      "front_left_door": {
+        "name": "Front left door"
+      },
+      "front_right_door": {
+        "name": "Front right door"
+      },
+      "rear_left_door": {
+        "name": "Rear left door"
+      },
+      "rear_right_door": {
+        "name": "Rear right door"
+      },
+      "front_cargo": {
+        "name": "Frunk"
+      },
+      "rear_cargo": {
+        "name": "Trunk"
+      },
+      "charge_port_door": {
+        "name": "Charge port door"
+      },
+      "walkaway_lock": {
+        "name": "Walkaway lock"
+      }
     }
   }
 }

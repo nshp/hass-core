@@ -17,5 +17,36 @@
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
     }
+  },
+  "entity": {
+    "sensor": {
+      "ac_current_limit": {
+        "name": "AC current limit"
+      },
+      "charging_start_time": {
+        "name": "Charging start time"
+      },
+      "charging_end_time": {
+        "name": "Charging end time"
+      },
+      "charging_status": {
+        "name": "Charging status"
+      },
+      "charging_target": {
+        "name": "Charging target"
+      },
+      "remaining_battery_percent": {
+        "name": "Remaining battery percent"
+      },
+      "mileage": {
+        "name": "Mileage"
+      },
+      "remaining_range_total": {
+        "name": "Remaining range total"
+      },
+      "remaining_range": {
+        "name": "Remaining range"
+      }
+    }
   }
 }

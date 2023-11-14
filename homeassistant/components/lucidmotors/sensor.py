@@ -204,6 +204,18 @@ SENSOR_TYPES: list[LucidSensorEntityDescription] = [
         native_unit_of_measurement=UnitOfPressure.BAR,
         suggested_display_precision=1,
     ),
+    LucidSensorEntityDescription(
+        key="mode",
+        key_path=["state", "alarm"],
+        translation_key="alarm_mode",
+        icon="mdi:shield-lock",
+    ),
+    LucidSensorEntityDescription(
+        key="status",
+        key_path=["state", "alarm"],
+        translation_key="alarm_status",
+        icon="mdi:shield-lock",
+    ),
 ]
 
 

@@ -85,6 +85,12 @@
       },
       "rear_right_tire_pressure": {
         "name": "Rear right tire pressure"
+      },
+      "alarm_mode": {
+        "name": "Alarm mode"
+      },
+      "alarm_status": {
+        "name": "Alarm status"
       }
     },
     "binary_sensor": {

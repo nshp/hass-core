@@ -42,7 +42,7 @@
         "name": "Charge session time remaining"
       },
       "charge_session_range": {
-        "name": "Charge session range"
+        "name": "Charge session range added"
       },
       "charging_rate": {
         "name": "Charging rate"

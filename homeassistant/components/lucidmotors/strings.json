@@ -120,6 +120,12 @@
       },
       "headlights": {
         "name": "Headlights"
+      },
+      "hvac_power": {
+        "name": "HVAC power"
+      },
+      "defrost_mode": {
+        "name": "Defrost mode"
       }
     }
   }

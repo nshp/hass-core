@@ -103,6 +103,20 @@ SENSOR_TYPES: dict[str, LucidBinarySensorEntityDescription] = {
         icon="mdi:car-light-high",
         is_on_fn=lambda vehicle: vehicle.state.chassis.headlights == "LIGHTS_ON",
     ),
+    "hvac_power": LucidBinarySensorEntityDescription(
+        key="power",
+        key_path=["state", "hvac"],
+        translation_key="hvac_power",
+        icon="mdi:hvac",
+        is_on_fn=lambda vehicle: vehicle.state.hvac.power != "HVAC_OFF",
+    ),
+    "defrost_mode": LucidBinarySensorEntityDescription(
+        key="defrost",
+        key_path=["state", "hvac"],
+        translation_key="defrost_mode",
+        icon="mdi:car-defrost-front",
+        is_on_fn=lambda vehicle: vehicle.state.hvac.defrost == "DEFROST_ON",
+    ),
 }
 
 

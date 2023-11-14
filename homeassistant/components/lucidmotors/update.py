@@ -5,7 +5,7 @@ import logging
 
 from lucidmotors import Vehicle
 
-from homeassistant.components.update import UpdateEntity
+from homeassistant.components.update import UpdateEntity, UpdateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -37,6 +37,7 @@ class LucidUpdateEntity(LucidBaseEntity, UpdateEntity):
 
     _attr_force_update: bool = False
     _attr_icon: str = "mdi:update"
+    _attr_supported_features = UpdateEntityFeature.PROGRESS
 
     def __init__(
         self, coordinator: LucidDataUpdateCoordinator, vehicle: Vehicle
@@ -59,3 +60,11 @@ class LucidUpdateEntity(LucidBaseEntity, UpdateEntity):
         if self.vehicle.state.software_update.version_available_raw == 0:
             return self.installed_version
         return self.vehicle.state.software_update.version_available
+
+    @property
+    def in_progress(self) -> bool | int:
+        """Return whether the update is in progress, and at what percentage."""
+        if self.vehicle.state.software_update.state != "IN_PROGRESS":
+            return False
+
+        return self.vehicle.state.software_update.percent_complete

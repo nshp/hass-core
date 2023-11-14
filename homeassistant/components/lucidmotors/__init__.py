@@ -8,6 +8,7 @@ from lucidmotors import LucidAPI, Vehicle
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import IntegrationError
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -84,3 +85,11 @@ class LucidBaseEntity(CoordinatorEntity[LucidDataUpdateCoordinator]):
         """When entity is added to hass."""
         await super().async_added_to_hass()
         self._handle_coordinator_update()
+
+    @property
+    def vehicle(self) -> Vehicle:
+        """Get the vehicle associated with this Entity."""
+        vehicle = self.coordinator.get_vehicle(self.vin)
+        if vehicle is None:
+            raise IntegrationError(f"Vehicle {self.vin} disappeared")
+        return vehicle

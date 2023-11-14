@@ -14,7 +14,6 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.exceptions import IntegrationError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import LucidBaseEntity
@@ -141,15 +140,12 @@ class LucidBinarySensor(LucidBaseEntity, BinarySensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        vehicle = self.coordinator.get_vehicle(self.vin)
-        if vehicle is None:
-            raise IntegrationError(f"Vehicle {self.vin} disappeared")
         _LOGGER.debug(
             "Updating binary sensor '%s' of %s",
             self.entity_description.key,
-            vehicle.config.nickname,
+            self.vehicle.config.nickname,
         )
-        state = vehicle
+        state = self.vehicle
         for attr in self.entity_description.key_path:
             state = getattr(state, attr)
         state = getattr(state, self.entity_description.key)
@@ -158,11 +154,7 @@ class LucidBinarySensor(LucidBaseEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         """Return the state."""
-        vehicle = self.coordinator.get_vehicle(self.vin)
-        if vehicle is None:
-            raise IntegrationError(f"Vehicle {self.vin} disappeared")
-        assert vehicle is not None
-        return self.entity_description.is_on_fn(vehicle)
+        return self.entity_description.is_on_fn(self.vehicle)
 
     @property
     def translation_key(self) -> str | None:

@@ -45,7 +45,6 @@ class LucidTrackerEntity(LucidBaseEntity, TrackerEntity):
         """Initialize the vehicle tracker."""
         super().__init__(coordinator, vehicle)
 
-        self.vehicle = vehicle
         self._attr_unique_id = self.vehicle.config.vin
         self._attr_name = None
 

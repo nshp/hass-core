@@ -1,7 +1,7 @@
 {
   "domain": "lucidmotors",
   "name": "Lucid Motors",
-  "codeowners": ["@nshp"],
+  "codeowners": ["@nshp, @borski"],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://www.home-assistant.io/integrations/lucidmotors",

@@ -127,6 +127,17 @@
       "defrost_mode": {
         "name": "Defrost mode"
       }
+    },
+    "button": {
+      "flash_lights": {
+        "name": "Flash lights"
+      },
+      "wake_up": {
+        "name": "Wake up vehicle"
+      },
+      "honk_horn": {
+        "name": "Honk horn"
+      }
     }
   }
 }

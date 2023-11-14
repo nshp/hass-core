@@ -17,6 +17,7 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, UnitOfLength, UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import IntegrationError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
@@ -125,12 +126,15 @@ class LucidSensor(LucidBaseEntity, SensorEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
+        vehicle = self.coordinator.get_vehicle(self.vin)
+        if vehicle is None:
+            raise IntegrationError(f"Vehicle {self.vin} disappeared")
         _LOGGER.debug(
             "Updating sensor '%s' of %s",
             self.entity_description.key,
-            self.vehicle.config.nickname,
+            vehicle.config.nickname,
         )
-        state = self.vehicle
+        state = vehicle
         for attr in self.entity_description.key_path:
             state = getattr(state, attr)
         state = getattr(state, self.entity_description.key)

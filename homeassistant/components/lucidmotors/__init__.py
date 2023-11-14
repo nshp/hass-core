@@ -55,7 +55,7 @@ class LucidBaseEntity(CoordinatorEntity[LucidDataUpdateCoordinator]):
     """Common base for Lucid vehicle entities."""
 
     coordinator: LucidDataUpdateCoordinator
-    vehicle: Vehicle
+    vin: str
 
     _attr_attribution: str = ATTRIBUTION
     _attr_has_entity_name: bool = True
@@ -67,17 +67,17 @@ class LucidBaseEntity(CoordinatorEntity[LucidDataUpdateCoordinator]):
         """Initialize entity."""
         super().__init__(coordinator)
 
-        self.vehicle = vehicle
+        self.vin = vehicle.config.vin
 
         self._attrs = {
-            "car": self.vehicle.config.nickname,
-            "vin": self.vehicle.config.vin,
+            "car": vehicle.config.nickname,
+            "vin": self.vin,
         }
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self.vehicle.config.vin)},
+            identifiers={(DOMAIN, vehicle.config.vin)},
             manufacturer="Lucid",
-            model=self.vehicle.config.model,
-            name=self.vehicle.config.nickname,
+            model=vehicle.config.model,
+            name=vehicle.config.nickname,
         )
 
     async def async_added_to_hass(self) -> None:

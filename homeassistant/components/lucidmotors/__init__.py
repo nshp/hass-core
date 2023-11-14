@@ -76,8 +76,8 @@ class LucidBaseEntity(CoordinatorEntity[LucidDataUpdateCoordinator]):
         }
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, vehicle.config.vin)},
-            manufacturer="Lucid",
-            model=vehicle.config.model,
+            manufacturer="Lucid Motors",
+            model=f"{vehicle.config.model} {vehicle.config.variant}",
             name=vehicle.config.nickname,
         )
 

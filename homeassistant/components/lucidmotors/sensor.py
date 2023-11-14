@@ -15,7 +15,16 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfLength, UnitOfTemperature
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfEnergy,
+    UnitOfLength,
+    UnitOfPower,
+    UnitOfPressure,
+    UnitOfSpeed,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
@@ -35,8 +44,8 @@ class LucidSensorEntityDescription(SensorEntityDescription):
     value: Callable = lambda x, y: x
 
 
-SENSOR_TYPES: dict[str, LucidSensorEntityDescription] = {
-    "charging_target": LucidSensorEntityDescription(
+SENSOR_TYPES: list[LucidSensorEntityDescription] = [
+    LucidSensorEntityDescription(
         key="charge_limit_percent",
         key_path=["state", "charging"],
         translation_key="charging_target",
@@ -44,7 +53,7 @@ SENSOR_TYPES: dict[str, LucidSensorEntityDescription] = {
         suggested_display_precision=0,
         native_unit_of_measurement=PERCENTAGE,
     ),
-    "remaining_battery_percent": LucidSensorEntityDescription(
+    LucidSensorEntityDescription(
         key="charge_percent",
         key_path=["state", "battery"],
         translation_key="remaining_battery_percent",
@@ -53,7 +62,72 @@ SENSOR_TYPES: dict[str, LucidSensorEntityDescription] = {
         suggested_display_precision=0,
         native_unit_of_measurement=PERCENTAGE,
     ),
-    "remaining_range": LucidSensorEntityDescription(
+    LucidSensorEntityDescription(
+        key="kwhr",
+        key_path=["state", "battery"],
+        translation_key="remaining_battery_power",
+        device_class=SensorDeviceClass.ENERGY_STORAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+    ),
+    LucidSensorEntityDescription(
+        key="capacity_kwhr",
+        key_path=["state", "battery"],
+        translation_key="battery_capacity",
+        device_class=SensorDeviceClass.ENERGY_STORAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+    ),
+    LucidSensorEntityDescription(
+        key="charge_session_kwh",
+        key_path=["state", "charging"],
+        translation_key="charge_session_power",
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL,
+        icon="mdi:battery-charging",
+        suggested_display_precision=0,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+    ),
+    LucidSensorEntityDescription(
+        key="charge_session_mi",
+        key_path=["state", "charging"],
+        translation_key="charge_session_range",
+        device_class=SensorDeviceClass.DISTANCE,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:map-marker-distance",
+        suggested_display_precision=0,
+        native_unit_of_measurement=UnitOfLength.MILES,
+    ),
+    LucidSensorEntityDescription(
+        key="charge_rate_kwh_precise",
+        key_path=["state", "charging"],
+        translation_key="charging_rate",
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        native_unit_of_measurement=UnitOfPower.KILO_WATT,
+    ),
+    LucidSensorEntityDescription(
+        key="charge_rate_mph_precise",
+        key_path=["state", "charging"],
+        translation_key="charging_rate_distance",
+        device_class=SensorDeviceClass.SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        native_unit_of_measurement=UnitOfSpeed.MILES_PER_HOUR,
+    ),
+    LucidSensorEntityDescription(
+        key="session_minutes_remaining",
+        key_path=["state", "charging"],
+        translation_key="charge_session_time_remaining",
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+    ),
+    LucidSensorEntityDescription(
         key="remaining_range",
         key_path=["state", "battery"],
         translation_key="remaining_range",
@@ -61,7 +135,16 @@ SENSOR_TYPES: dict[str, LucidSensorEntityDescription] = {
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfLength.KILOMETERS,
     ),
-    "exterior_temp": LucidSensorEntityDescription(
+    LucidSensorEntityDescription(
+        key="odometer_km",
+        key_path=["state", "chassis"],
+        translation_key="mileage",
+        icon="mdi:counter",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+    ),
+    LucidSensorEntityDescription(
         key="exterior_temp_c",
         key_path=["state", "cabin"],
         translation_key="exterior_temp",
@@ -71,7 +154,7 @@ SENSOR_TYPES: dict[str, LucidSensorEntityDescription] = {
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         suggested_display_precision=1,
     ),
-    "interior_temp": LucidSensorEntityDescription(
+    LucidSensorEntityDescription(
         key="interior_temp_c",
         key_path=["state", "cabin"],
         translation_key="interior_temp",
@@ -81,7 +164,47 @@ SENSOR_TYPES: dict[str, LucidSensorEntityDescription] = {
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         suggested_display_precision=1,
     ),
-}
+    LucidSensorEntityDescription(
+        key="front_left_tire_pressure_bar",
+        key_path=["state", "chassis"],
+        translation_key="front_left_tire_pressure",
+        icon="mdi:tire",
+        device_class=SensorDeviceClass.PRESSURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfPressure.BAR,
+        suggested_display_precision=1,
+    ),
+    LucidSensorEntityDescription(
+        key="front_right_tire_pressure_bar",
+        key_path=["state", "chassis"],
+        translation_key="front_right_tire_pressure",
+        icon="mdi:tire",
+        device_class=SensorDeviceClass.PRESSURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfPressure.BAR,
+        suggested_display_precision=1,
+    ),
+    LucidSensorEntityDescription(
+        key="rear_left_tire_pressure_bar",
+        key_path=["state", "chassis"],
+        translation_key="rear_left_tire_pressure",
+        icon="mdi:tire",
+        device_class=SensorDeviceClass.PRESSURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfPressure.BAR,
+        suggested_display_precision=1,
+    ),
+    LucidSensorEntityDescription(
+        key="rear_right_tire_pressure_bar",
+        key_path=["state", "chassis"],
+        translation_key="rear_right_tire_pressure",
+        icon="mdi:tire",
+        device_class=SensorDeviceClass.PRESSURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfPressure.BAR,
+        suggested_display_precision=1,
+    ),
+]
 
 
 async def async_setup_entry(
@@ -98,7 +221,7 @@ async def async_setup_entry(
         entities.extend(
             [
                 LucidSensor(coordinator, vehicle, description)
-                for (attribute_name, description) in SENSOR_TYPES.items()
+                for description in SENSOR_TYPES
             ]
         )
 

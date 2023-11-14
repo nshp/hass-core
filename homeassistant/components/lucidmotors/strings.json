@@ -117,6 +117,9 @@
       },
       "walkaway_lock": {
         "name": "Walkaway lock"
+      },
+      "headlights": {
+        "name": "Headlights"
       }
     }
   }

@@ -133,6 +133,7 @@ class LucidLight(LucidBaseEntity, LightEntity):
                 # Update our local state for the entity so that it doesn't appear
                 # to revert to its previous state until the next API update
                 self._is_on = True
+                self.async_write_ha_state()
             except APIError as ex:
                 raise HomeAssistantError(ex) from ex
 
@@ -141,6 +142,7 @@ class LucidLight(LucidBaseEntity, LightEntity):
         try:
             await self.entity_description.turn_off_function(self.api, self.vehicle)
             self._is_on = False
+            self.async_write_ha_state()
         except APIError as ex:
             raise HomeAssistantError(ex) from ex
 

@@ -96,13 +96,6 @@ SENSOR_TYPES: dict[str, LucidBinarySensorEntityDescription] = {
         is_on_fn=lambda vehicle: vehicle.state.body.walkaway_lock_enabled
         == "WALKAWAY_ACTIVE",
     ),
-    "headlights": LucidBinarySensorEntityDescription(
-        key="headlights",
-        key_path=["state", "chassis"],
-        translation_key="headlights",
-        icon="mdi:car-light-high",
-        is_on_fn=lambda vehicle: vehicle.state.chassis.headlights == "LIGHTS_ON",
-    ),
     "hvac_power": LucidBinarySensorEntityDescription(
         key="power",
         key_path=["state", "hvac"],

@@ -138,6 +138,11 @@
       "honk_horn": {
         "name": "Honk horn"
       }
+    },
+    "switch": {
+      "headlights": {
+        "name": "Headlights"
+      }
     }
   }
 }

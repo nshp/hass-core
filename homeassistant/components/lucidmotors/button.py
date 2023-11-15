@@ -1,12 +1,11 @@
-"""Support for reading vehicle status from Lucid API."""
+"""Button entities for Lucid vehicles."""
 from __future__ import annotations
 
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 import logging
-from typing import Any
 
-from lucidmotors import APIError, Vehicle
+from lucidmotors import APIError, LucidAPI, Vehicle
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
@@ -25,7 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 class LucidButtonEntityDescriptionMixin:
     """Mixin to describe a Lucid Button entity."""
 
-    remote_function: Callable[[Any, Any], Coroutine[Any, Any, None]]
+    remote_function: Callable[[LucidAPI, Vehicle], Coroutine[None, None, None]]
 
 
 @dataclass

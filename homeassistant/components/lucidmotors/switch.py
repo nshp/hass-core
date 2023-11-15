@@ -15,7 +15,7 @@ from homeassistant.components.switch import (
     SwitchEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -85,6 +85,7 @@ class LucidSwitch(LucidBaseEntity, SwitchEntity):
 
     entity_description: LucidSwitchEntityDescription
     _attr_has_entity_name: bool = True
+    _is_on: bool
 
     def __init__(
         self,
@@ -98,10 +99,31 @@ class LucidSwitch(LucidBaseEntity, SwitchEntity):
         self.api = coordinator.api
         self._attr_unique_id = f"{vehicle.config.vin}-{description.key}"
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        _LOGGER.debug(
+            "Updating binary sensor '%s' of %s",
+            self.entity_description.key,
+            self.vehicle.config.nickname,
+        )
+        state = self.vehicle
+        for attr in self.entity_description.key_path:
+            state = getattr(state, attr)
+        state = getattr(state, self.entity_description.key)
+        # Using != off_value rather than == on_value so that UNKNOWN states
+        # will be considered on. This may not always be the right answer, but I
+        # think it's better to turn unknown things off rather than on?
+        self._is_on = state != self.entity_description.off_value
+        super()._handle_coordinator_update()
+
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on the switch."""
         try:
             await self.entity_description.turn_on_function(self.api, self.vehicle)
+            # Update our local state for the entity so that it doesn't appear
+            # to revert to its previous state until the next API update
+            self._is_on = True
         except APIError as ex:
             raise HomeAssistantError(ex) from ex
 
@@ -109,14 +131,11 @@ class LucidSwitch(LucidBaseEntity, SwitchEntity):
         """Turn off the switch."""
         try:
             await self.entity_description.turn_off_function(self.api, self.vehicle)
+            self._is_on = False
         except APIError as ex:
             raise HomeAssistantError(ex) from ex
 
     @property
     def is_on(self) -> bool:
         """Get the current state of the switch."""
-        state = self.vehicle
-        for attr in self.entity_description.key_path:
-            state = getattr(state, attr)
-        state = getattr(state, self.entity_description.key)
-        return state == self.entity_description.on_value
+        return self._is_on

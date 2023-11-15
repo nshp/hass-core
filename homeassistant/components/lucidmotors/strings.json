@@ -137,11 +137,13 @@
       }
     },
     "switch": {
-      "headlights": {
-        "name": "Headlights"
-      },
       "defrost_mode": {
         "name": "Defrost mode"
+      }
+    },
+    "light": {
+      "headlights": {
+        "name": "Headlights"
       }
     }
   }

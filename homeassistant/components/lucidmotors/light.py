@@ -7,12 +7,12 @@ import logging
 from typing import Any
 
 from lucidmotors import APIError, LucidAPI, Vehicle
-from lucidmotors.vehicle import DefrostState
+from lucidmotors.vehicle import LightState
 
-from homeassistant.components.switch import (
-    SwitchDeviceClass,
-    SwitchEntity,
-    SwitchEntityDescription,
+from homeassistant.components.light import (
+    ColorMode,
+    LightEntity,
+    LightEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -27,8 +27,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
-class LucidSwitchEntityDescriptionMixin:
-    """Mixin to describe a Lucid Switch entity."""
+class LucidLightEntityDescriptionMixin:
+    """Mixin to describe a Lucid Light entity."""
 
     key_path: list[str]
     turn_on_function: Callable[[LucidAPI, Vehicle], Coroutine[None, None, None]]
@@ -38,23 +38,22 @@ class LucidSwitchEntityDescriptionMixin:
 
 
 @dataclass
-class LucidSwitchEntityDescription(
-    SwitchEntityDescription, LucidSwitchEntityDescriptionMixin
+class LucidLightEntityDescription(
+    LightEntityDescription, LucidLightEntityDescriptionMixin
 ):
-    """Describes Lucid switch entity."""
+    """Describes Lucid light entity."""
 
 
-SWITCH_TYPES: tuple[LucidSwitchEntityDescription, ...] = (
-    LucidSwitchEntityDescription(
-        key="defrost",
-        key_path=["state", "hvac"],
-        translation_key="defrost_mode",
-        icon="mdi:car-defrost-front",
-        device_class=SwitchDeviceClass.SWITCH,
-        turn_on_function=lambda api, vehicle: api.defrost_on(vehicle),
-        turn_off_function=lambda api, vehicle: api.defrost_off(vehicle),
-        on_value=DefrostState.ON,
-        off_value=DefrostState.OFF,
+LIGHT_TYPES: tuple[LucidLightEntityDescription, ...] = (
+    LucidLightEntityDescription(
+        key="headlights",
+        key_path=["state", "chassis"],
+        translation_key="headlights",
+        icon="mdi:car-light-high",
+        turn_on_function=lambda api, vehicle: api.lights_on(vehicle),
+        turn_off_function=lambda api, vehicle: api.lights_off(vehicle),
+        on_value=LightState.ON,
+        off_value=LightState.OFF,
     ),
 )
 
@@ -67,23 +66,23 @@ async def async_setup_entry(
     """Set up the Lucid sensors from config entry."""
     coordinator: LucidDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    entities: list[LucidSwitch] = []
+    entities: list[LucidLight] = []
 
     for vehicle in coordinator.api.vehicles:
         entities.extend(
             [
-                LucidSwitch(coordinator, vehicle, description)
-                for description in SWITCH_TYPES
+                LucidLight(coordinator, vehicle, description)
+                for description in LIGHT_TYPES
             ]
         )
 
     async_add_entities(entities)
 
 
-class LucidSwitch(LucidBaseEntity, SwitchEntity):
-    """Representation of a Lucid vehicle switch."""
+class LucidLight(LucidBaseEntity, LightEntity):
+    """Representation of a Lucid vehicle light."""
 
-    entity_description: LucidSwitchEntityDescription
+    entity_description: LucidLightEntityDescription
     _attr_has_entity_name: bool = True
     _is_on: bool
 
@@ -91,19 +90,21 @@ class LucidSwitch(LucidBaseEntity, SwitchEntity):
         self,
         coordinator: LucidDataUpdateCoordinator,
         vehicle: Vehicle,
-        description: LucidSwitchEntityDescription,
+        description: LucidLightEntityDescription,
     ) -> None:
-        """Initialize Lucid vehicle switch."""
+        """Initialize Lucid vehicle light."""
         super().__init__(coordinator, vehicle)
         self.entity_description = description
         self.api = coordinator.api
         self._attr_unique_id = f"{vehicle.config.vin}-{description.key}"
+        self._attr_supported_color_modes = {ColorMode.ONOFF}
+        self._attr_color_mode = ColorMode.ONOFF
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         _LOGGER.debug(
-            "Updating switch '%s' of %s",
+            "Updating light '%s' of %s",
             self.entity_description.key,
             self.vehicle.config.nickname,
         )
@@ -118,7 +119,7 @@ class LucidSwitch(LucidBaseEntity, SwitchEntity):
         super()._handle_coordinator_update()
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        """Turn on the switch."""
+        """Turn on the light."""
         try:
             await self.entity_description.turn_on_function(self.api, self.vehicle)
             # Update our local state for the entity so that it doesn't appear

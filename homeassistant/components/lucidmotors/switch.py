@@ -7,7 +7,7 @@ import logging
 from typing import Any
 
 from lucidmotors import APIError, LucidAPI, Vehicle
-from lucidmotors.vehicle import LightState
+from lucidmotors.vehicle import DefrostState, LightState
 
 from homeassistant.components.switch import (
     SwitchDeviceClass,
@@ -44,7 +44,7 @@ class LucidSwitchEntityDescription(
     """Describes Lucid switch entity."""
 
 
-SWITCH_TYPES: list[LucidSwitchEntityDescription] = [
+SWITCH_TYPES: tuple[LucidSwitchEntityDescription, ...] = (
     LucidSwitchEntityDescription(
         key="headlights",
         key_path=["state", "chassis"],
@@ -56,7 +56,18 @@ SWITCH_TYPES: list[LucidSwitchEntityDescription] = [
         on_value=LightState.ON,
         off_value=LightState.OFF,
     ),
-]
+    LucidSwitchEntityDescription(
+        key="defrost",
+        key_path=["state", "hvac"],
+        translation_key="defrost_mode",
+        icon="mdi:car-defrost-front",
+        device_class=SwitchDeviceClass.SWITCH,
+        turn_on_function=lambda api, vehicle: api.defrost_on(vehicle),
+        turn_off_function=lambda api, vehicle: api.defrost_off(vehicle),
+        on_value=DefrostState.ON,
+        off_value=DefrostState.OFF,
+    ),
+)
 
 
 async def async_setup_entry(
@@ -103,7 +114,7 @@ class LucidSwitch(LucidBaseEntity, SwitchEntity):
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         _LOGGER.debug(
-            "Updating binary sensor '%s' of %s",
+            "Updating switch '%s' of %s",
             self.entity_description.key,
             self.vehicle.config.nickname,
         )

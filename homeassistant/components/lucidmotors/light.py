@@ -10,9 +10,11 @@ from lucidmotors import APIError, LucidAPI, Vehicle
 from lucidmotors.vehicle import LightState
 
 from homeassistant.components.light import (
+    ATTR_FLASH,
     ColorMode,
     LightEntity,
     LightEntityDescription,
+    LightEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -33,6 +35,7 @@ class LucidLightEntityDescriptionMixin:
     key_path: list[str]
     turn_on_function: Callable[[LucidAPI, Vehicle], Coroutine[None, None, None]]
     turn_off_function: Callable[[LucidAPI, Vehicle], Coroutine[None, None, None]]
+    flash_function: Callable[[LucidAPI, Vehicle], Coroutine[None, None, None]]
     on_value: Any
     off_value: Any
 
@@ -52,6 +55,7 @@ LIGHT_TYPES: tuple[LucidLightEntityDescription, ...] = (
         icon="mdi:car-light-high",
         turn_on_function=lambda api, vehicle: api.lights_on(vehicle),
         turn_off_function=lambda api, vehicle: api.lights_off(vehicle),
+        flash_function=lambda api, vehicle: api.lights_flash(vehicle),
         on_value=LightState.ON,
         off_value=LightState.OFF,
     ),
@@ -99,6 +103,7 @@ class LucidLight(LucidBaseEntity, LightEntity):
         self._attr_unique_id = f"{vehicle.config.vin}-{description.key}"
         self._attr_supported_color_modes = {ColorMode.ONOFF}
         self._attr_color_mode = ColorMode.ONOFF
+        self._attr_supported_features = LightEntityFeature.FLASH
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -120,13 +125,16 @@ class LucidLight(LucidBaseEntity, LightEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on the light."""
-        try:
-            await self.entity_description.turn_on_function(self.api, self.vehicle)
-            # Update our local state for the entity so that it doesn't appear
-            # to revert to its previous state until the next API update
-            self._is_on = True
-        except APIError as ex:
-            raise HomeAssistantError(ex) from ex
+        if ATTR_FLASH in kwargs:
+            await self.entity_description.flash_function(self.api, self.vehicle)
+        else:
+            try:
+                await self.entity_description.turn_on_function(self.api, self.vehicle)
+                # Update our local state for the entity so that it doesn't appear
+                # to revert to its previous state until the next API update
+                self._is_on = True
+            except APIError as ex:
+                raise HomeAssistantError(ex) from ex
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off the switch."""
